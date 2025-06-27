@@ -20,7 +20,17 @@ class CustomerType(DjangoObjectType):
         """Meta class to define the model for this type."""
 
         model = Customer
-        fields = '__all__'
+        fields = "__all__"
+
+
+# Input type for customer data in mutations.
+# This is used to validate input data for creating or updating customers.
+class CustomerInput(graphene.InputObjectType):
+    """Input type for customer data in mutations."""
+
+    name = graphene.String(required=True)
+    email = graphene.String(required=True)
+    phone = graphene.String()
 
 
 class Query(graphene.ObjectType):
@@ -31,7 +41,7 @@ class Query(graphene.ObjectType):
 
     hello = graphene.String(default_value="Hello, GraphQL!")
     all_customers = graphene.List(CustomerType)
-    get_customer = graphene.Field(CustomerType, id=graphene.Int(required=True)))
+    get_customer = graphene.Field(CustomerType, id=graphene.Int(required=True))
 
     def resolve_all_customers(self, info):
         """
@@ -40,7 +50,6 @@ class Query(graphene.ObjectType):
         """
         return Customer.objects.all()
 
-
     def resolve_get_customer(self, info, id):
         """
         Resolver for the get_customer query.
@@ -48,12 +57,9 @@ class Query(graphene.ObjectType):
         """
 
         try:
-            return Customer.objects.get(customer_id=id)
+            return Customer.objects.get(id=id)
         except Customer.DoesNotExist:
             return None
-
-# Create the schema instance that Django will import
-schema = graphene.Schema(query=Query)
 
 
 class CreateCustomer(graphene.Mutation):
@@ -64,7 +70,6 @@ class CreateCustomer(graphene.Mutation):
     class Arguments:
         """Arguments for the mutation to create a customer."""
 
-        id = graphene.ID()
         name = graphene.String(required=True)
         email = graphene.String(required=True)
         phone = graphene.String()
@@ -73,49 +78,35 @@ class CreateCustomer(graphene.Mutation):
     status = graphene.Boolean()
     message = graphene.String()
 
-
-    def mutate(self, root, info, name, email, phone=None, id=None):
+    def mutate(self, info, name, email, phone=None):
         """Create a new customer with the provided details."""
 
         # *** create a new customer instance
         try:
-            if not id:
-                customer = Customer(name=name, email=email, phone=phone)
-                customer.save()
-                return CreateCustomer(
-                    customer=customer,
-                    status=True,
-                    message="Customer created successfully."
-                )
-            
             # check if email exists
             if Customer.objects.filter(email=email).exists():
                 return CreateCustomer(
-                    customer=None,
-                    status=False,
-                    message="Email already exists."
+                    customer=None, status=False, message="Email already exists."
                 )
-  
-        
 
-        # *** update a customer instance
-            new_customer = Customer.objects.get(customer_id=customer.customer_id)
-            new_customer.name = name
-            new_customer.email = email
-            new_customer.phone = phone
-            new_customer.save()
+            # check if name exists
+            if Customer.objects.filter(name=name).exists():
+                return CreateCustomer(
+                    customer=None, status=False, message="Name already exists."
+                )
+
+            customer = Customer.objects.create(name=name, email=email, phone=phone)
             return CreateCustomer(
-                customer=new_customer
+                customer=customer,
                 status=True,
-                message="Customer updated successfully."
+                message="Customer created successfully.",
             )
-          
+
         except Exception as e:
             return CreateCustomer(
-                customer=None,
-                status=False,
-                message=f"An error occurred: {str(e)}"
+                customer=None, status=False, message=f"An error occurred: {str(e)}"
             )
+
 
 class BulkCreateCustomers(graphene.Mutation):
     """
@@ -125,11 +116,11 @@ class BulkCreateCustomers(graphene.Mutation):
     class Arguments:
         """Arguments for the mutation to create multiple customers."""
 
-        customers = graphene.List(CustomerType, required=True)
+        customers = graphene.List(CustomerInput, required=True)
 
     errors = graphene.List(graphene.String)
 
-    def mutate(self, root, info, customers):
+    def mutate(self, info, customers):
         """Create multiple customers with the provided details."""
 
         errors = []
@@ -137,11 +128,10 @@ class BulkCreateCustomers(graphene.Mutation):
 
         try:
             for customer_data in customers:
-                customer = CreateCustomer().mutate(
-                    root, info, 
-                    name=customer_data.get('name'),
-                    email=customer_data.get('email'),
-                    phone=customer_data.get('phone', None)
+                customer = Customer.objects.create(
+                    name=customer_data.get("name"),
+                    email=customer_data.get("email"),
+                    phone=customer_data.get("phone", None),
                 )
 
                 # Check if the customer was created successfully
@@ -150,17 +140,12 @@ class BulkCreateCustomers(graphene.Mutation):
                 else:
                     errors.append(customer.message)
 
-            return BulkCreateCustomers(
-                errors=errors,
-                customers=created_customers
-            )
-        
+            return BulkCreateCustomers(errors=errors, customers=created_customers)
+
         except Exception as e:
             errors.append(f"An error occurred: {str(e)}")
-            return BulkCreateCustomers(
-                errors=errors,
-                customers=[]
-            )
+            return BulkCreateCustomers(errors=errors, customers=[])
+
 
 class Mutation(graphene.ObjectType):
     """
@@ -168,7 +153,6 @@ class Mutation(graphene.ObjectType):
     """
 
     create_customer = CreateCustomer.Field()
-    update_customer = CreateCustomer.Field()
     bulk_create_customers = BulkCreateCustomers.Field()
 
 
