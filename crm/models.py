@@ -51,6 +51,7 @@ class Order(models.Model):
     products = models.ManyToManyField(
         "Product", related_name="order_products", blank=False
     )
+
     total_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,

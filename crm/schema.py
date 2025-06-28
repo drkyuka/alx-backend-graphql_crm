@@ -5,6 +5,7 @@ crm/schema.py
 This file contains the schema configuration for the GraphQL CRM application.
 """
 
+import datetime
 import re
 import graphene
 from graphene_django import DjangoObjectType
@@ -49,9 +50,9 @@ class CreateCustomer(graphene.Mutation):
     def mutate(self, info, input):
         """create a new customer in the CRM system."""
 
-        name = input.get("name")
-        email = input.get("email")
-        phone = input.get("phone")
+        name = input.name
+        email = input.email
+        phone = input.phone
 
         if not name or not email:
             return CreateCustomer(customer=None, message="Name and email are required.")
@@ -194,10 +195,10 @@ class CreateProduct(graphene.Mutation):
         if stock < 0:
             return CreateProduct(product=None, message="Stock cannot be negative.")
 
-        # if Product.objects.filter(name=name).exists():
-        #     return CreateProduct(
-        #         product=None, message=f"Product with name {name} already exists."
-        #     )
+        if Product.objects.filter(name=name).exists():
+            return CreateProduct(
+                product=None, message=f"Product with name {name} already exists."
+            )
 
         try:
             product = Product.objects.create(name=name, price=price, stock=stock)
@@ -220,6 +221,13 @@ class OrderType(DjangoObjectType):
         fields = "__all__"
 
 
+class OrderInput(graphene.InputObjectType):
+    """Input type for order data in mutations."""
+
+    customerId = graphene.ID(required=True)
+    productIds = graphene.List(graphene.ID, required=True)
+
+
 class CreateOrder(graphene.Mutation):
     """
     Mutation class for creating a new order.
@@ -227,32 +235,40 @@ class CreateOrder(graphene.Mutation):
 
     order = graphene.Field(OrderType)
     total_amount = graphene.Decimal()
+    order_date = graphene.DateTime()
 
     class Arguments:
         """Arguments for the order mutation."""
 
-        customer_id = graphene.ID(required=True)
-        product_ids = graphene.List(graphene.ID, required=True)
+        input = OrderInput(required=True)
 
-    def mutate(
-        self, _info: graphene.ResolveInfo, customer_id: str, product_ids: list
-    ) -> "CreateOrder":
+    def mutate(self, info, input):
         """Create a new order in the CRM system."""
         try:
-            customer = Customer.objects.get(id=customer_id)
-            products = Product.objects.filter(id__in=product_ids)
-
-            total_amount = sum(product.price for product in products)
-            order = Order.objects.create(customer=customer, total_amount=total_amount)
-            order.products.set(products)
-            return CreateOrder(order=order)
-
-        except Product.DoesNotExist:
-            raise ValueError(
-                f"One or more products with IDs {product_ids} do not exist."
-            )
+            customer = Customer.objects.get(id=input.customerId)
         except Customer.DoesNotExist:
-            raise ValueError(f"Customer with ID {customer_id} does not exist.")
+            raise ValueError(f"Customer with ID {input.customerId} does not exist.")
+
+        try:
+            products = Product.objects.filter(id__in=input.productIds)
+        except Product.DoesNotExist:
+            raise ValueError("One or more products do not exist.")
+
+        try:
+            total_amount = sum(product.price for product in products)
+            order_date = datetime.datetime.now()
+
+            order = Order.objects.create(
+                customer=customer, order_date=order_date, total_amount=total_amount
+            )
+            order.products.set(products)
+
+            return CreateOrder(
+                order=order,
+                total_amount=total_amount,
+                order_date=order_date,
+            )
+
         except Exception as e:
             raise ValueError(f"Error creating order: {str(e)}")
 
