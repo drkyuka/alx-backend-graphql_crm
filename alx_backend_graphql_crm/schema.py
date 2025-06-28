@@ -2,10 +2,12 @@
 
 # -*- coding: utf-8 -*-
 """
+graphql_crm/schema.py
 alx_backend_graphql schema.py
 """
 
 import graphene
+from crm.schema import Query as CRMQuery, Mutation as CRMMutation
 
 
 class Query(graphene.ObjectType):
@@ -13,11 +15,23 @@ class Query(graphene.ObjectType):
 
     hello = graphene.String()
 
-    def resolve_hello(self, info):
+    def resolve_hello(self, _info: graphene.ResolveInfo) -> str:
         """
         Resolver for the base query.
         """
         return "Hello, GraphQL!"
 
 
-schema = graphene.Schema(query=Query)
+class Query(CRMQuery, graphene.ObjectType):
+    """Extends the CRM Query class to include additional queries."""
+
+    pass
+
+
+class Mutation(CRMMutation, graphene.ObjectType):
+    """Mutation to handle create operations in the CRM."""
+
+    pass
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
