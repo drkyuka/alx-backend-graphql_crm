@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 """
 graphql_crm/schema.py
-alx_backend_graphql schema.py
+alx-backend-graphql_crm schema.py
 """
 
 import graphene

@@ -9,7 +9,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
 # Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "alx_backend_graphql_crm.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "alx-backend-graphql_crm.settings")
 import django
 
 django.setup()
