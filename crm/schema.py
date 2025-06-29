@@ -67,7 +67,7 @@ class CreateCustomer(graphene.Mutation):
                 customer=None, message=f"Customer with email {email} already exists."
             )
 
-        if phone and not re.match(r"^(\+?\d{7,15}|\d{3}-\d{3}-\d{4})$", phone):
+        if phone and not re.match(r"^(\+?\d{10}|\d{3}-\d{3}-\d{4})$", phone):
             return CreateCustomer(
                 customer=None,
                 message="Phone number is not valid. It should be in the format +1234567890 or 123-456-7890.",
@@ -183,7 +183,7 @@ class CreateProduct(graphene.Mutation):
     def mutate(self, info, input):
         """Create a new product in the CRM system."""
         name = input.name
-        price = Decimal(str(input.price)).quantize(Decimal("0.01"))
+        price = Decimal(input.price).quantize(Decimal("0.01"), rounding="ROUND_UP")
         stock = input.stock
 
         if not name or not price:
@@ -203,7 +203,7 @@ class CreateProduct(graphene.Mutation):
         try:
             product = Product.objects.create(name=name, price=price, stock=stock)
             return CreateProduct(
-                product=product, message=f"Product {name} created successfully."
+                product=product, message=f"Product {product.name} created successfully."
             )
         except Exception as e:
             return CreateProduct(product=None, message=str(e))

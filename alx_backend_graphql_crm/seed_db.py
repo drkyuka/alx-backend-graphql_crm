@@ -112,106 +112,132 @@ def create_products():
         {
             "name": "Laptop Pro",
             "price": Decimal("1299.99"),
+            "stock": 50,
         },
         {
             "name": "Wireless Mouse",
             "price": Decimal("29.99"),
+            "stock": 100,
         },
         {
             "name": "Mechanical Keyboard",
             "price": Decimal("89.99"),
+            "stock": 75,
         },
         {
             "name": "4K Monitor",
             "price": Decimal("399.99"),
+            "stock": 30,
         },
         {
             "name": "Smartphone",
             "price": Decimal("799.99"),
+            "stock": 60,
         },
         {
             "name": "Wireless Headphones",
             "price": Decimal("199.99"),
+            "stock": 80,
         },
         {
             "name": "Tablet",
             "price": Decimal("349.99"),
+            "stock": 40,
         },
         {
             "name": "Webcam HD",
             "price": Decimal("79.99"),
+            "stock": 90,
         },
         {
             "name": "USB-C Hub",
             "price": Decimal("49.99"),
+            "stock": 120,
         },
         {
             "name": "Portable SSD",
             "price": Decimal("129.99"),
+            "stock": 70,
         },
         {
             "name": "Bluetooth Speaker",
             "price": Decimal("59.99"),
+            "stock": 110,
         },
         {
             "name": "Smartwatch",
             "price": Decimal("299.99"),
+            "stock": 55,
         },
         {
             "name": "Wireless Charger",
             "price": Decimal("39.99"),
+            "stock": 95,
         },
         {
             "name": "Gaming Chair",
             "price": Decimal("249.99"),
+            "stock": 25,
         },
         {
             "name": "Desk Lamp",
             "price": Decimal("34.99"),
+            "stock": 85,
         },
         {
             "name": "Printer",
             "price": Decimal("149.99"),
+            "stock": 45,
         },
         {
             "name": "Router",
             "price": Decimal("179.99"),
+            "stock": 65,
         },
         {
             "name": "Power Bank",
             "price": Decimal("44.99"),
+            "stock": 105,
         },
         {
             "name": "Microphone",
             "price": Decimal("89.99"),
+            "stock": 50,
         },
         {
             "name": "Cable Management",
             "price": Decimal("19.99"),
+            "stock": 3,
         },
         {
             "name": "Monitor Stand",
             "price": Decimal("54.99"),
+            "stock": 7,
         },
         {
             "name": "Laptop Stand",
             "price": Decimal("39.99"),
+            "stock": 10,
         },
         {
             "name": "Phone Case",
             "price": Decimal("24.99"),
+            "stock": 150,
         },
         {
             "name": "Stylus Pen",
             "price": Decimal("29.99"),
+            "stock": 200,
         },
         {
             "name": "Card Reader",
             "price": Decimal("14.99"),
+            "stock": 300,
         },
         {
             "name": "Ethernet Cable",
             "price": Decimal("12.99"),
+            "stock": 0,
         },
     ]
 
@@ -256,7 +282,7 @@ def create_orders(customers, products):
         )
 
         # Select 3-8 random products for this order
-        num_products = random.randint(3, 8)
+        num_products = random.randint(1, 8)
         selected_products = random.sample(products, num_products)
 
         total_amount = Decimal("0.00")
