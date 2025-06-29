@@ -10,7 +10,7 @@ import graphene
 from crm.schema import Query as CRMQuery, Mutation as CRMMutation
 
 
-class Query(graphene.ObjectType):
+class Query(CRMQuery, graphene.ObjectType):
     """Query to return a greeting message."""
 
     hello = graphene.String()
@@ -20,12 +20,6 @@ class Query(graphene.ObjectType):
         Resolver for the base query.
         """
         return "Hello, GraphQL!"
-
-
-class Query(CRMQuery, graphene.ObjectType):
-    """Extends the CRM Query class to include additional queries."""
-
-    pass
 
 
 class Mutation(CRMMutation, graphene.ObjectType):
