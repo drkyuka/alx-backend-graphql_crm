@@ -9,8 +9,11 @@ import datetime
 import re
 import graphene
 from graphene_django import DjangoObjectType
-from crm.models import Customer, Product, Order
+from graphene import relay
 from decimal import Decimal
+from graphene_django.filter import DjangoFilterConnectionField
+from crm.models import Customer, Product, Order
+from crm.filters import CustomerFilter, ProductFilter, OrderFilter
 
 
 class CustomerType(DjangoObjectType):
@@ -23,7 +26,8 @@ class CustomerType(DjangoObjectType):
         """Meta class for the CustomerType."""
 
         model = Customer
-        fields = "__all__"
+        filterset_class = CustomerFilter
+        interfaces = (relay.Node,)
 
 
 class CustomerInput(graphene.InputObjectType):
@@ -159,6 +163,8 @@ class ProductType(DjangoObjectType):
 
         model = Product
         fields = "__all__"
+        filterset_class = ProductFilter
+        interfaces = (relay.Node,)
 
 
 class ProductInput(graphene.InputObjectType):
@@ -219,6 +225,8 @@ class OrderType(DjangoObjectType):
 
         model = Order
         fields = "__all__"
+        filterset_class = OrderFilter
+        interfaces = (relay.Node,)
 
 
 class OrderInput(graphene.InputObjectType):
@@ -280,20 +288,42 @@ class Query(graphene.ObjectType):
     """
 
     # Define your queries here
-    customers = graphene.List(lambda: CustomerType)
-    products = graphene.List(lambda: ProductType)
-    orders = graphene.List(lambda: OrderType)
+    # all_customers = graphene.List(lambda: CustomerType)
+    # all_products = graphene.List(lambda: ProductType)
+    # all_orders = graphene.List(lambda: OrderType)
 
-    def resolve_customers(self, info):
-        """Resolver for the customers query."""
+    # def resolve_all_customers(self, info):
+    #     """Resolver for the customers query."""
+    #     return Customer.objects.all()
+
+    # def resolve_all_products(self, info):
+    #     """Resolver for the products query."""
+    #     return Product.objects.all()
+
+    # def resolve_all_orders(self, info):
+    #     """Resolver for the orders query."""
+    #     return Order.objects.all()
+
+    all_customers = DjangoFilterConnectionField(CustomerType)
+    all_products = DjangoFilterConnectionField(ProductType)
+    all_orders = DjangoFilterConnectionField(OrderType)
+
+    def resolve_all_customers(self, info, orderby=None, **kwargs):
+        """Resolver for the all_customers query."""
+        if orderby:
+            return Customer.objects.all().order_by(orderby)
         return Customer.objects.all()
 
-    def resolve_products(self, info):
-        """Resolver for the products query."""
+    def resolve_all_products(self, info, orderby=None, **kwargs):
+        """Resolver for the all_products query."""
+        if orderby:
+            return Product.objects.all().order_by(orderby)
         return Product.objects.all()
 
-    def resolve_orders(self, info):
-        """Resolver for the orders query."""
+    def resolve_all_orders(self, info, orderby=None, **kwargs):
+        """Resolver for the all_orders query."""
+        if orderby:
+            return Order.objects.all().order_by(orderby)
         return Order.objects.all()
 
 
