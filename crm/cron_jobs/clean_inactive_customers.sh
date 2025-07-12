@@ -1,4 +1,24 @@
 #!/bin/bash
+
+# script deletes inactive customers 
+
+# set the base variable to the directory of this script
+base="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cwd=$(pwd)
+log_file="/tmp/customer_cleanup_log.txt"
+
+# check if the log file exists
+if cd "$base/../.." ; then
+    echo "$timestamp: Error reaching base file." >> "$log_file" 2>&1
+    exit 1
+fi
+
+# check if log file exists
+if [ ! -f "$log_file" ]; then
+    touch "$log_file"
+fi
+
+# Ensure the script is run from the correct directory
 timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 deleted_customers=$(
     pipenv run python3 manage.py shell -c "
@@ -17,15 +37,17 @@ deleted_customers=$(
     count_inactive = inactive_customers.count()
 
     # Delete inactive customers one by one to handle related objects safely
-    # for customer in inactive_customers:
-    #     customer.delete()
+    for customer in inactive_customers:
+        customer.delete()
 
     print(count_inactive)
     "
 )
 
+
 if [ -n "$deleted_customers" ]; then
-    echo "$deleted_customers inactive customers deleted since $timestamp" >> /tmp/customer_cleanup_log.txt 2>&1
+    echo "$timestamp: $deleted_customers inactive customers deleted from $cwd" >> "$log_file" 2>&1
 else
-    echo "No inactive customers to delete."
+    echo "$timestamp: No inactive customers to delete." >> "$log_file" 2>&1
+
 fi
