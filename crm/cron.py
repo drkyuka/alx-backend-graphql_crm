@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
+# This script logs a heartbeat message for the CRM system.
 
 import datetime
 
@@ -9,7 +10,7 @@ from gql.transport.requests import RequestsHTTPTransport
 BASE_URL = "http://localhost:8000/graphql"
 
 
-def write_to_log(message):
+def write_to_log(message: str):
     """
     Write a message to the log file with a timestamp.
     """
@@ -34,7 +35,7 @@ def log_crm_heartbeat():
         retries=3,
     )
 
-    client = Client(transport=_transport, auto_schema=True)
+    client: Client = Client(transport=_transport, auto_schema=True)
 
     query = gql(
         """

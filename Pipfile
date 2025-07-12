@@ -12,6 +12,7 @@ django-cron = "*"
 django-celery-beat = "*"
 django-crontab = "*"
 gql = "*"
+requests = "*"
 
 [dev-packages]
 
