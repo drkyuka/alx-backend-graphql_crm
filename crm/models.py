@@ -11,6 +11,8 @@ class Customer(models.Model):
     Model to represent a customer in the CRM system.
     """
 
+    objects = models.BaseManager()
+
     name = models.CharField(max_length=255, blank=False, null=False)
     email = models.EmailField(unique=True, blank=False, null=False)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -25,6 +27,8 @@ class Product(models.Model):
     """
     Model to represent a product in the CRM system.
     """
+
+    objects = models.BaseManager()
 
     name = models.CharField(max_length=255, blank=False, null=False)
     price = models.DecimalField(

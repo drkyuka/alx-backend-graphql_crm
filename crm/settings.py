@@ -130,5 +130,6 @@ GRAPHENE = {"SCHEMA": "alx-backend-graphql_crm.schema.schema"}
 
 # include cron jobs settings
 CRONJOBS = [
+    ("0 */12 * * *", "crm.cron.update_low_stock"),
     ("*/5 * * * *", "crm.cron.log_crm_heartbeat"),
 ]

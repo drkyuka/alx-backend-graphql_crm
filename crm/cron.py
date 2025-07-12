@@ -2,7 +2,6 @@
 # This script logs a heartbeat message for the CRM system.
 
 import datetime
-
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -35,7 +34,7 @@ def log_crm_heartbeat():
         retries=3,
     )
 
-    client: Client = Client(transport=_transport, auto_schema=True)
+    client = Client(transport=_transport, fetch_schema_from_transport=True)
 
     query = gql(
         """
@@ -47,3 +46,53 @@ def log_crm_heartbeat():
 
     # Execute the query to ensure the CRM is responsive
     response = client.execute(query).get("hello", "CRM is not responding")
+
+    write_to_log(f"Response from CRM: {response}")
+
+
+def update_low_stock():
+    """
+    Update the stock levels for low inventory items.
+    This function is intended to be run periodically to ensure stock levels are accurate.
+    """
+    _transport = RequestsHTTPTransport(
+        url=BASE_URL,
+        verify=True,
+        retries=3,
+        use_json=True,
+    )
+
+    client = Client(transport=_transport, fetch_schema_from_transport=True)
+    query = gql(
+        """
+        mutation {
+            updateLowStock {
+                success
+                message
+                products {
+                    name
+                    stock
+                }
+            }
+        }
+        """
+    )
+
+    result = client.execute(query)
+
+    if not result:
+        write_to_log("Failed to update low stock products.")
+    else:
+        success = result.get("updateLowStock", {}).get("success", False)
+        message = result.get("updateLowStock", {}).get("message", "No message provided")
+        products = result.get("updateLowStock", {}).get("products", [])
+
+        write_to_log(f"Low stock update success: {success}, Message: {message}")
+
+        if products:
+            for product in products:
+                name = product.get("name", "Unknown")
+                stock = product.get("stock", 0)
+                write_to_log(f"Product: {name}, Updated Stock: {stock}")
+        else:
+            write_to_log("No products updated.")

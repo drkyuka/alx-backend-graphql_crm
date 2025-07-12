@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 
 import graphene
@@ -6,11 +7,12 @@ This file contains the schema configuration for the GraphQL CRM application.
 """
 
 import datetime
+from decimal import Decimal
+
 import re
 import graphene
-from graphene_django import DjangoObjectType
 from graphene import relay
-from decimal import Decimal
+from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from crm.models import Customer, Product, Order
 from crm.filters import CustomerFilter, ProductFilter, OrderFilter
@@ -213,6 +215,37 @@ class CreateProduct(graphene.Mutation):
             )
         except Exception as e:
             return CreateProduct(product=None, message=str(e))
+
+
+class UpdateLowStockProducts(graphene.Mutation):
+    """
+    Mutation class for updating low stock products.
+    This mutation can be used to update the stock levels of products that are low in inventory.
+    """
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    products = graphene.List(ProductType)
+
+    def mutate(self, info):
+        """Update low stock products in the CRM system."""
+        try:
+            low_stock_products = Product.objects.filter(stock__lt=10)
+            for product in low_stock_products:
+                product.stock += 10  # Example logic to increase stock
+                product.save()
+
+            return UpdateLowStockProducts(
+                success=True,
+                message="Low stock products updated successfully.",
+                products=low_stock_products,
+            )
+        except ValueError as e:
+            return UpdateLowStockProducts(
+                success=False,
+                message=f"Error updating low stock products: {str(e)}",
+                products=None,
+            )
 
 
 class OrderType(DjangoObjectType):
