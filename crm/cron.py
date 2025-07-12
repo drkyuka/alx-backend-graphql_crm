@@ -15,7 +15,7 @@ def write_to_log(message: str):
     Write a message to the log file with a timestamp.
     """
     date = datetime.datetime.now().strftime("%D/%M/%Y-%H:%M:%S")
-    log_file = "/tmp/cron_log.txt"
+    log_file = "/tmp/crm_heartbeat_log.txt"
 
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(f"{date} {message}\n")

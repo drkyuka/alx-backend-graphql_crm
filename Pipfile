@@ -10,9 +10,9 @@ graphene-django = "*"
 django-filter = "*"
 django-cron = "*"
 django-celery-beat = "*"
-django-crontab = "*"
 gql = "*"
 requests = "*"
+django-crontab = "*"
 
 [dev-packages]
 
