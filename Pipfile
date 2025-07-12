@@ -10,6 +10,7 @@ graphene-django = "*"
 django-filter = "*"
 django-cron = "*"
 django-celery-beat = "*"
+gql = "*"
 
 [dev-packages]
 
