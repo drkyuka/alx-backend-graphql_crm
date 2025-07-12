@@ -7,13 +7,13 @@ from gql.transport.requests import RequestsHTTPTransport
 
 
 BASE_URL = "http://localhost:8000/graphql"
+date = datetime.datetime.now().strftime("%D/%M/%Y-%H:%M:%S")
 
 
 def write_to_log(log_path: str, message: str):
     """
     Write a message to the log file with a timestamp.
     """
-    date = datetime.datetime.now().strftime("%D/%M/%Y-%H:%M:%S")
 
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"{date} {message}\n")
