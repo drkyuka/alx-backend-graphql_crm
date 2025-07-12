@@ -8,6 +8,8 @@ django = "*"
 graphene-django-optimizer = "*"
 graphene-django = "*"
 django-filter = "*"
+django-cron = "*"
+django-celery-beat = "*"
 
 [dev-packages]
 
